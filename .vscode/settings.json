@@ -8,8 +8,10 @@
   "[python]": {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": true
+      "source.organizeImports": "explicit"
     }
-  }
+  },
+  "jupyter.kernels.trusted": [],
+  "jupyter.askForKernelRestart": false
 }
 
