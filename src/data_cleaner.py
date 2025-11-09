@@ -124,29 +124,37 @@ class SolarDataCleaner:
         pd.DataFrame
             Dataframe with outlier flags added
         """
+        # Create a copy to avoid modifying original dataframe
         df_with_flags = self.df.copy()
+        # Initialize outlier flag column - all rows start as False (no outlier)
         df_with_flags['Outlier_Flag'] = False
         
         for col in columns:
+            # Skip if column doesn't exist in dataframe
             if col not in df_with_flags.columns:
                 continue
             
-            # Calculate Z-scores using scipy.stats
+            # Calculate Z-scores using scipy.stats (more robust than manual calculation)
+            # Z-score = (value - mean) / std_deviation
+            # Values with |Z| > threshold are considered outliers
             z_scores = np.abs(stats.zscore(df_with_flags[col].dropna()))
             
-            # Create mask for outliers
+            # Create boolean mask: True where |Z-score| > threshold
+            # This identifies rows with outliers in the current column
             outlier_mask = np.abs(stats.zscore(df_with_flags[col])) > z_threshold
             
-            # Update outlier flag
+            # Update the Outlier_Flag column: set to True for detected outliers
+            # Using .loc ensures we're modifying the dataframe in-place safely
             df_with_flags.loc[outlier_mask, 'Outlier_Flag'] = True
             
-            # Store statistics
+            # Store statistics for reporting: count and percentage of outliers
             num_outliers = outlier_mask.sum()
             self.outlier_flags[col] = {
                 'count': int(num_outliers),
                 'percentage': float((num_outliers / len(df_with_flags)) * 100)
             }
         
+        # Update instance dataframe and return
         self.df = df_with_flags
         return df_with_flags
     
@@ -154,6 +162,9 @@ class SolarDataCleaner:
                     z_threshold: float = 3.0) -> pd.DataFrame:
         """
         Cap outliers to ±z_threshold standard deviations.
+        
+        This method uses Winsorization: values beyond ±z_threshold standard deviations
+        are capped to the boundary values rather than removed.
         
         Parameters:
         -----------
@@ -167,20 +178,31 @@ class SolarDataCleaner:
         pd.DataFrame
             Dataframe with outliers capped
         """
+        # Create copy to avoid modifying original
         df_capped = self.df.copy()
         
         for col in columns:
+            # Skip if column doesn't exist
             if col not in df_capped.columns:
                 continue
             
+            # Calculate mean and standard deviation for the column
+            # These are used to determine the capping boundaries
             mean = df_capped[col].mean()
             std = df_capped[col].std()
             
+            # Calculate boundaries: values beyond these will be capped
+            # Lower bound: mean - (z_threshold * std)
+            # Upper bound: mean + (z_threshold * std)
             lower_bound = mean - (z_threshold * std)
             upper_bound = mean + (z_threshold * std)
             
+            # Clip values: anything below lower_bound becomes lower_bound,
+            # anything above upper_bound becomes upper_bound
+            # This preserves the data structure while removing extreme values
             df_capped[col] = df_capped[col].clip(lower=lower_bound, upper=upper_bound)
         
+        # Store cleaned dataframe and return
         self.df_cleaned = df_capped
         return df_capped
     
