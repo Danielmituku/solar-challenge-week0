@@ -133,3 +133,10 @@ export_cleaned_data(df_cleaned, 'data/benin_clean.csv')
 ```
 
 See `scripts/example_usage.py` for more examples.
+
+## Documentation
+
+- **[Source Code Modules](src/README.md)** - Detailed module documentation with usage examples
+- **[Commit Message Guide](docs/COMMIT_MESSAGE_GUIDE.md)** - Best practices for commit messages
+- **[Streamlit Dashboard](docs/STREAMLIT_DASHBOARD.md)** - Planned dashboard interface documentation
+- **[Cross-Country Synthesis](scripts/cross_country_synthesis.py)** - Script for aggregating country data
