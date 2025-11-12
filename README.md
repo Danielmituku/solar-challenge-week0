@@ -63,10 +63,14 @@ Follow these steps to reproduce the development environment:
 
 ```
 solar-challenge-week0/
-├── data/              # Data files
+├── app/               # Streamlit dashboard application
+│   ├── __init__.py
+│   ├── main.py        # Main dashboard script
+│   └── utils.py       # Dashboard utilities
+├── data/              # Data files (gitignored)
 ├── notebooks/         # Jupyter notebooks
 ├── scripts/           # Utility scripts
-├── src/               # Source code
+├── src/               # Source code modules
 ├── tests/             # Test files
 ├── venv/              # Virtual environment (gitignored)
 ├── requirements.txt   # Python dependencies
@@ -108,8 +112,14 @@ All deliverables are available on the main branch:
   - `data_exporter.py` - Data export functionality
   - See `src/README.md` for module documentation
 
+- **📊 Cross-Country Comparison:** See `notebooks/` directory
+  - `compare_countries.ipynb` - Statistical comparison across countries
 
-For a complete list of deliverables, see [DELIVERABLES.md](DELIVERABLES.md).
+- **🌐 Interactive Dashboard:** See `app/` directory
+  - `app/main.py` - Streamlit dashboard application
+  - `app/utils.py` - Dashboard utility functions
+  - Run with: `streamlit run app/main.py`
+
 
 ## Using Reusable Modules
 
@@ -134,9 +144,71 @@ export_cleaned_data(df_cleaned, 'data/benin_clean.csv')
 
 See `scripts/example_usage.py` for more examples.
 
+## Streamlit Dashboard
+
+### Running Locally
+
+1. **Activate virtual environment:**
+   ```bash
+   .\venv\Scripts\Activate.ps1  # Windows
+   source venv/bin/activate      # Mac/Linux
+   ```
+
+2. **Run the dashboard:**
+   ```bash
+   streamlit run app/main.py
+   ```
+
+3. **Open browser to http://localhost:8501**
+
+### Features
+
+- **Country Selection**: Multi-select widget to choose countries (Benin, Sierra Leone, Togo)
+- **Date Range Filter**: Filter data by date range in the sidebar
+- **GHI Boxplot**: Interactive visualization of Global Horizontal Irradiance distribution
+- **DNI Boxplot**: Direct Normal Irradiance distribution visualization
+- **DHI Boxplot**: Diffuse Horizontal Irradiance distribution visualization
+- **Time Series Plot**: Daily average GHI over time with country comparison
+- **Top Regions Table**: Summary statistics by country (mean, median, std dev for GHI, DNI, DHI)
+- **Real-time Filtering**: All visualizations update automatically based on selections
+- **Performance Optimized**: Cached data loading and efficient filtering operations
+
+### Dashboard Structure
+
+```
+app/
+├── __init__.py
+├── main.py          # Main Streamlit application
+└── utils.py         # Utility functions for data processing
+```
+
+### Deployment
+
+The dashboard can be deployed to Streamlit Community Cloud:
+
+1. **Push code to GitHub** (ensure `app/main.py` exists)
+2. **Connect repository to Streamlit Cloud**:
+   - Go to https://share.streamlit.io/
+   - Sign in with GitHub
+   - Click "New app"
+3. **Configure deployment**:
+   - Select repository: `solar-challenge-week0`
+   - Set main file path: `app/main.py`
+   - Select branch: `dashboard-dev` or `main`
+4. **Deploy** and access via public URL
+
+### Requirements
+
+The dashboard requires the following packages (already in `requirements.txt`):
+- `streamlit>=1.45.0`
+- `pandas>=2.3.3`
+- `plotly>=6.4.0`
+- `numpy>=2.3.4`
+
 ## Documentation
 
 - **[Source Code Modules](src/README.md)** - Detailed module documentation with usage examples
 - **[Commit Message Guide](docs/COMMIT_MESSAGE_GUIDE.md)** - Best practices for commit messages
 - **[Streamlit Dashboard](docs/STREAMLIT_DASHBOARD.md)** - Planned dashboard interface documentation
 - **[Cross-Country Synthesis](scripts/cross_country_synthesis.py)** - Script for aggregating country data
+- **[Bonus Dashboard Guide](BONUS_DASHBOARD_STEP_BY_STEP_GUIDE.md)** - Step-by-step guide for dashboard development
