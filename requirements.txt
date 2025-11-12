@@ -92,7 +92,7 @@ pytest==8.3.4
 python-dateutil==2.9.0.post0
 python-json-logger==4.0.0
 pytz==2025.2
-pywinpty==3.0.2
+# pywinpty==3.0.2  # Windows-only package, not needed for CI/Linux
 PyYAML==6.0.3
 pyzmq==27.1.0
 referencing==0.37.0
