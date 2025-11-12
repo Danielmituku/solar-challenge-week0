@@ -11,6 +11,7 @@ sys.path.insert(0, str(project_root))
 
 from app.utils import (
     load_all_countries_data,
+    load_data_from_uploaded_files,
     filter_data_by_countries,
     create_summary_table
 )
@@ -27,19 +28,109 @@ st.set_page_config(
 st.title("☀️ Solar Irradiance Dashboard - West Africa")
 st.markdown("Interactive visualization of solar potential across Benin, Sierra Leone, and Togo")
 
-# Load data with caching
-@st.cache_data
-def load_data():
-    """Load and cache the combined dataset."""
-    return load_all_countries_data()
+# Sidebar - File Upload Section
+st.sidebar.header("📁 Data Source")
 
-# Load data (cached)
-df = load_data()
+# Option to choose data source
+data_source = st.sidebar.radio(
+    "Choose data source:",
+    ["Upload Files", "Use Local Files"],
+    help="Upload CSV files or use files from local directory"
+)
 
-# Pre-compute date range for better performance (only once)
-if 'min_date' not in st.session_state:
+df = None
+
+if data_source == "Upload Files":
+    st.sidebar.subheader("📤 Upload Cleaned CSV Files")
+    
+    st.sidebar.info(
+        """
+        **Upload your cleaned CSV files:**
+        - Files should have a `Timestamp` column
+        - Must include `GHI`, `DNI`, `DHI` columns
+        - You can upload 1-3 files (at least one required)
+        """
+    )
+    
+    uploaded_benin = st.sidebar.file_uploader(
+        "Upload Benin Cleaned CSV",
+        type=['csv'],
+        key='benin',
+        help="Upload benin_clean.csv file"
+    )
+    
+    uploaded_sierra_leone = st.sidebar.file_uploader(
+        "Upload Sierra Leone Cleaned CSV",
+        type=['csv'],
+        key='sierra_leone',
+        help="Upload sierra_leone_clean.csv file"
+    )
+    
+    uploaded_togo = st.sidebar.file_uploader(
+        "Upload Togo Cleaned CSV",
+        type=['csv'],
+        key='togo',
+        help="Upload togo_clean.csv file"
+    )
+    
+    # Check if at least one file is uploaded
+    uploaded_files = {
+        'benin': uploaded_benin,
+        'sierra_leone': uploaded_sierra_leone,
+        'togo': uploaded_togo
+    }
+    
+    if any(uploaded_files.values()):
+        try:
+            with st.spinner("Loading uploaded data..."):
+                from app.utils import load_data_from_uploaded_files
+                df = load_data_from_uploaded_files(uploaded_files)
+                st.sidebar.success(f"✅ Loaded {len(df):,} records")
+        except Exception as e:
+            st.error(f"❌ Error loading uploaded files: {str(e)}")
+            st.stop()
+    else:
+        st.info("👆 Please upload at least one cleaned CSV file to get started.")
+        st.stop()
+
+else:  # Use Local Files
+    # Load data with caching
+    @st.cache_data
+    def load_data():
+        """Load and cache the combined dataset."""
+        return load_all_countries_data()
+    
+    # Load data (cached)
+    try:
+        df = load_data()
+        st.sidebar.success(f"✅ Loaded {len(df):,} records from local files")
+    except FileNotFoundError as e:
+        st.error(f"❌ Data Loading Error: {str(e)}")
+        st.info(
+            """
+            **Local files not found.**
+            
+            Please switch to "Upload Files" mode in the sidebar to upload your CSV files,
+            or ensure the cleaned CSV files are in the `data/` directory.
+            
+            **Files needed:**
+            - `data/benin_clean.csv`
+            - `data/sierra_leone_clean.csv`
+            - `data/togo_clean.csv`
+            """
+        )
+        st.stop()
+
+if df is None or len(df) == 0:
+    st.warning("⚠️ No data available. Please upload files or check local file paths.")
+    st.stop()
+
+# Pre-compute date range for better performance
+# Recalculate if data changes (for uploaded files)
+if 'df_hash' not in st.session_state or st.session_state.df_hash != hash(str(df.shape) + str(df['Timestamp'].min()) + str(df['Timestamp'].max())):
     st.session_state.min_date = df['Timestamp'].min().date()
     st.session_state.max_date = df['Timestamp'].max().date()
+    st.session_state.df_hash = hash(str(df.shape) + str(df['Timestamp'].min()) + str(df['Timestamp'].max()))
 
 min_date = st.session_state.min_date
 max_date = st.session_state.max_date
@@ -47,14 +138,19 @@ max_date = st.session_state.max_date
 # Sidebar
 st.sidebar.header("📊 Filters")
 
+# Get available countries from loaded data
+available_countries = sorted(df['Country'].unique().tolist()) if df is not None and len(df) > 0 else []
+
 # Country selection widget
-countries = ['Benin', 'Sierra Leone', 'Togo']
-selected_countries = st.sidebar.multiselect(
-    "Select Countries",
-    options=countries,
-    default=countries,
-    help="Choose one or more countries to visualize"
-)
+if available_countries:
+    selected_countries = st.sidebar.multiselect(
+        "Select Countries",
+        options=available_countries,
+        default=available_countries,
+        help="Choose one or more countries to visualize"
+    )
+else:
+    selected_countries = []
 
 # Date range filter
 st.sidebar.subheader("📅 Date Range")
