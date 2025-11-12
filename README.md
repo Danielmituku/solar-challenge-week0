@@ -1,5 +1,8 @@
-# solar-challenge-week0
-This repo has been created for learning-purpose only.
+# Solar Challenge Week 0 - West Africa Solar Data Analysis
+
+**Repository:** [https://github.com/Danielmituku/solar-challenge-week0](https://github.com/Danielmituku/solar-challenge-week0)
+
+This repository contains a comprehensive analysis of solar irradiance data from three West African countries (Benin, Sierra Leone, and Togo), including exploratory data analysis, statistical comparisons, and an interactive Streamlit dashboard.
 
 ## Setup Environment
 
@@ -15,7 +18,7 @@ Follow these steps to reproduce the development environment:
 
 1. **Clone the repository** (if you haven't already):
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Danielmituku/solar-challenge-week0.git
    cd solar-challenge-week0
    ```
 
