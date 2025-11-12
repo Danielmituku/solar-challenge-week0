@@ -188,6 +188,7 @@ app/
 ### Deployment
 
 The dashboard can be deployed to Streamlit Community Cloud:
+Or already deployed with the link:  https://dashboard-solar-challenge-week0.streamlit.app/
 
 1. **Push code to GitHub** (ensure `app/main.py` exists)
 2. **Connect repository to Streamlit Cloud**:
